@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vSuVrgBGczrW4KJndLJSiaYbZSu7xnY7hJn8gxe8Oge1DtE3HkbE2B0X2h2SmI9L
+      POSTGRES_DB: shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.data/postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: redis-server --requirepass ir3rFLxw8ZYk2oCpyK6wRsi7FYDz9iUdeF5gsmAHhtUEVTJgRY6mvcieXTYtJDPv
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./.data/redis_data:/data

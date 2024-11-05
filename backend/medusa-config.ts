@@ -1,43 +1,36 @@
-import { defineConfig, loadEnv, Modules } from "@medusajs/framework/utils";
+import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 
-loadEnv(process.env.NODE_ENV, process.cwd());
+loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
-export default defineConfig({
+module.exports = defineConfig({
   projectConfig: {
-    redisUrl: process.env.REDIS_URL,
     databaseUrl: process.env.DATABASE_URL,
-    databaseLogging: true,
     http: {
-      storeCors: process.env.STORE_CORS,
-      adminCors: process.env.ADMIN_CORS,
-      authCors: process.env.AUTH_CORS,
+      storeCors: process.env.STORE_CORS!,
+      adminCors: process.env.ADMIN_CORS!,
+      authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
-    },
-  },
-  admin: {
-    backendUrl: "https://munchies.medusajs.app",
-    // backendUrl: "http://localhost:9000",
+    }
   },
   modules: [
     {
-      resolve: "./modules/sanity",
+      resolve: "@medusajs/medusa/payment",
       options: {
-        api_token: process.env.SANITY_API_TOKEN,
-        project_id: process.env.SANITY_PROJECT_ID,
-        api_version: new Date().toISOString().split("T")[0],
-        dataset: "production",
-        studio_url: "https://munchies-tinloof.vercel.app/cms",
-        type_map: {
-          collection: "collection",
-          category: "category",
-          product: "product",
-        },
+        providers: [
+          {
+            resolve: "@medusajs/medusa/payment-stripe",
+            id: "stripe",
+            options: {
+              apiKey: process.env.STRIPE_API_KEY,
+              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+            },
+          },
+        ],
       },
     },
     {
       resolve: "@medusajs/medusa/file",
-      key: Modules.FILE,
       options: {
         providers: [
           {
@@ -56,19 +49,21 @@ export default defineConfig({
       },
     },
     {
-      resolve: "@medusajs/medusa/payment",
-      key: Modules.PAYMENT,
+      resolve: "@medusajs/medusa/notification",
       options: {
         providers: [
           {
-            resolve: "@medusajs/medusa/payment-stripe",
-            id: "stripe",
+            resolve: "@medusajs/medusa/notification-sendgrid",
+            id: "sendgrid",
             options: {
-              apiKey: process.env.STRIPE_API_KEY,
+              channels: ["email"],
+              api_key: process.env.SENDGRID_API_KEY,
+              from: process.env.SENDGRID_FROM,
             },
           },
         ],
       },
     },
-  ],
-});
+
+  ]
+})
